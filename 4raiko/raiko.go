@@ -2,8 +2,18 @@ package main
 
 import (
 	"fmt"
+	"sort"
 )
 
+// 请完成函数f，输入的5个数字代表5张牌，含义如下：
+// 0x102,0x103,0x104,0x105,0x106,0x107,0x108,0x109,0x10a,0x10b,0x10c,0x10d,0x10e分别代表方块2,3,4,5,6,7,8,9,10,J,Q,K,A
+// 0x202,0x203,0x204,0x205,0x206,0x207,0x208,0x209,0x20a,0x20b,0x20c,0x20d,0x20e分别代表梅花2,3,4,5,6,7,8,9,10,J,Q,K,A
+// 0x302,0x303,0x304,0x305,0x306,0x307,0x308,0x309,0x30a,0x30b,0x30c,0x30d,0x30e分别代表红桃2,3,4,5,6,7,8,9,10,J,Q,K,A
+// 0x402,0x403,0x404,0x405,0x406,0x407,0x408,0x409,0x40a,0x40b,0x40c,0x40d,0x40e分别代表黑桃2,3,4,5,6,7,8,9,10,J,Q,K,A
+// 0x50f代表小王
+// 0x610代表大王
+// 小王大王可以变为任意牌，要求算出小王大王变换后最大牌型
+// 返回的数字含义如下：
 // 1、皇家同花顺：如果花色一样，数字分别是10,J,Q,K,A
 // 2、同花顺：如果花色一样，数字是连续的，皇家同花顺除外
 // 3、金刚：其中4张牌数字一样
@@ -14,28 +24,80 @@ import (
 // 8、两对：其中2张牌数字一样，另外其中2张牌数字一样，最后一张数字不一样
 // 9、一对：其中2张牌数字一样，另外数字不一样
 // 10、高牌：什么都不是
-// 0x50f代表小王
-// 0x610代表大王
 
-var test1 = []int{0x102, 0x103, 0x104, 0x105, 0x106, 0x107, 0x108, 0x109, 0x10a, 0x10b, 0x10c, 0x10d, 0x10e}
-var test2 = []int{0x202, 0x203, 0x204, 0x205, 0x206, 0x207, 0x208, 0x209, 0x20a, 0x20b, 0x20c, 0x20d, 0x20e}
-var test3 = []int{0x302, 0x303, 0x304, 0x305, 0x306, 0x307, 0x308, 0x309, 0x30a, 0x30b, 0x30c, 0x30d, 0x30e}
-var test4 = []int{0x402, 0x403, 0x404, 0x405, 0x406, 0x407, 0x408, 0x409, 0x40a, 0x40b, 0x40c, 0x40d, 0x40e}
+type cardType int
+
+// String
+func (state cardType) String() string {
+	return [...]string{
+		"",
+		"皇家同花顺", //1
+		"同花顺",   //2
+		"金刚",    //3
+		"葫芦",    //4
+		"同花",    //5
+		"顺子",    //6
+		"三条",    //7
+		"两对",    //8
+		"一对",    //9
+		"高牌",    //10
+
+		"END",
+	}[state]
+}
+
+var allCard = []int{0x102, 0x103, 0x104, 0x105, 0x106, 0x107, 0x108, 0x109, 0x10a, 0x10b, 0x10c, 0x10d, 0x10e,
+	0x202, 0x203, 0x204, 0x205, 0x206, 0x207, 0x208, 0x209, 0x20a, 0x20b, 0x20c, 0x20d, 0x20e,
+	0x302, 0x303, 0x304, 0x305, 0x306, 0x307, 0x308, 0x309, 0x30a, 0x30b, 0x30c, 0x30d, 0x30e,
+	0x402, 0x403, 0x404, 0x405, 0x406, 0x407, 0x408, 0x409, 0x40a, 0x40b, 0x40c, 0x40d, 0x40e, 0x50f, 0x610}
+
+// combinations 取所有組合
+func combinations(arr []int, n int) [][]int {
+	var helper func([]int, int, int)
+	res := [][]int{}
+	data := make([]int, n)
+
+	helper = func(arr []int, n int, idx int) {
+		if idx == n {
+			temp := make([]int, n)
+			copy(temp, data)
+			res = append(res, temp)
+			return
+		}
+		for i := 0; i < len(arr); i++ {
+			data[idx] = arr[i]
+			helper(arr[i+1:], n, idx+1)
+		}
+	}
+	helper(arr, n, 0)
+	return res
+}
 
 func main() {
+	// data := [][]string{
+	// 	{"花色", "點數", "牌型"},
+	// }
+	// for _, combination := range combinations(allCard, 5) {
+	// 	flush := ""
+	// 	point := ""
+	// 	for _, handCard := range combination {
+	// 		flush += strconv.Itoa(getHighestDigit(handCard)) + " "
+	// 		point += strconv.Itoa(getLowestDigit(handCard)) + " "
+	// 	}
+	// 	tmp := f(combination)
+	// 	data = append(data, []string{flush, point, cardType(tmp).String(), strconv.Itoa(tmp)})
 
-	fmt.Println(f([]int{0x10a, 0x10b, 0x10c, 0x10d, 0x10e}))
+	// }
+	// create_file.CreateCsv(data)
+	fmt.Println(f([]int{0x102, 0x103, 0x104, 0x105, 0x10e}))
 
 }
 
-// var raiko = []int{0x50f, 0x610}
-
 func f(input []int) int {
 	if len(input) != 5 {
-		input = input[:5]
+		return 0
 	}
 
-	cardType := 10
 	statistics := make(map[int]int)
 	raikoCount := 0
 	samePoint := []int{}
@@ -49,158 +111,148 @@ func f(input []int) int {
 	}
 
 	for _, v := range statistics {
-		if v > 1 {
-			samePoint = append(samePoint, v)
-		}
+		samePoint = append(samePoint, v)
 	}
 
-	cardType = calculatorSame(raikoCount, samePoint)
-
-	cardType = calculatorStraight(raikoCount, input, statistics)
-
+	cardType := raikoRepeat(raikoCount, samePoint)
+	straightCard := raikoStraight(raikoCount, input)
+	if cardType > straightCard {
+		return straightCard
+	}
 	return cardType
+
 }
 
-func calculatorSame(raiko int, same []int) int {
+func raikoRepeat(raiko int, same []int) int {
 	if len(same) == 0 && raiko == 0 {
 		return 10
 	}
 
-	max := raiko
+	max := []int{}
 	for _, v := range same {
-		v += raiko
+		max = append(max, v)
+	}
+
+	sort.Ints(max)
+
+	max[len(max)-1] += raiko
+
+	if max[len(max)-1] > 3 {
+		return 3
+	} else if max[len(max)-1] == 3 && max[len(max)-2] == 2 {
+		return 4
+	} else if max[len(max)-1] == 3 {
+		return 7
+	} else if max[len(max)-1] == 2 {
+		return 9
+	}
+	return 10
+}
+
+// "金刚",      //3
+// "葫芦",      //4
+// "同花",      //5
+// "顺子",      //6
+// "三条",      //7
+// "两对",      //8
+// "一对",      //9
+// "高牌",      //10
+
+func raikoStraight(raikoCount int, input []int) int {
+	isStraight := true
+	cardType := 10
+	sortInput := []int{}
+
+	for _, v := range input {
+		sortInput = append(sortInput, getLowestDigit(v))
+	}
+
+	sort.Ints(sortInput)
+	checkDuplicates := removeDuplicates(sortInput)
+
+	if len(checkDuplicates)+raikoCount == 5 {
+
+		passCount := raikoCount
+		for i := 1; i < len(sortInput); i++ {
+			fmt.Println(sortInput[i], sortInput[i-1])
+			if sortInput[i] != sortInput[i-1]+1 {
+				if i == len(sortInput)-1 && sortInput[i] == 14 && sortInput[i-1] == 5 {
+					sortInput[len(sortInput)-1] = 1
+					continue
+				}
+
+				if passCount > 0 {
+					if sortInput[i] == sortInput[i-1]+2 || i == len(sortInput)-1 && sortInput[i] == 14 && sortInput[i-1] == 4 {
+						passCount--
+						continue
+					}
+				}
+
+				if passCount > 1 {
+					if sortInput[i] == sortInput[i-1]+3 || i == len(sortInput)-1 && sortInput[i] == 14 && sortInput[i-1] == 3 {
+						passCount -= 2
+						continue
+					}
+				}
+
+				isStraight = false
+				break
+			}
+		}
+	} else {
+		isStraight = false
+	}
+	isFlush := flush(raikoCount, input)
+
+	if isStraight && isFlush {
+		if sortInput[len(sortInput)-1] == 14 {
+			return 1
+		} else {
+			return 2
+		}
+	} else if isFlush {
+		return 5
+	} else if isStraight {
+		return 6
+	} else {
+		return cardType
+	}
+
+}
+
+func flush(raiko int, input []int) bool {
+	flushMap := make(map[int]int)
+	for _, v := range input {
+		flushMap[getHighestDigit(v)]++
+	}
+	max := 0
+	for _, v := range flushMap {
 		if v > max {
 			max = v
 		}
 	}
 
-	if max == 4 {
-		return 3
-	} else if max == 3 && len(same) > 1 {
-		return 4
-	} else if max == 3 {
-		return 7
-	} else if max == 2 && len(same) > 1 {
-		return 8
-	} else if max == 2 {
-		return 9
-	}
-
-	return 10
-}
-
-func calculatorStraight(raiko int, input []int, statistics map[int]int) int {
-	cardType := 10
-
-	switch raiko {
-	case 0:
-		cardType = straight(input)
-	case 1:
-		cardType = oneRaikoStraight(input)
-	case 2:
-		cardType = twoRaikoStraight(input)
-	}
-
-	return cardType
-
-}
-
-func oneRaikoStraight(input []int) int {
-	isStraight := true
-	cardType := 10
-	for i := 0; i < len(input)/2-1; i++ {
-		if input[i]+input[len(input)-1-i] != input[len(input)/2]*2 {
-			isStraight = false
-			break
-		}
-	}
-
-	isFlush := flush(input)
-
-	if isStraight && isFlush {
-		if input[len(input)/2] == 0x10c {
-			return 1
-		} else {
-			return 2
-		}
-	} else if isStraight {
-		return 6
-	} else if isFlush {
-		return 5
+	if max+raiko >= 5 {
+		return true
 	} else {
-		return cardType
+		return false
 	}
 
 }
 
-func twoRaikoStraight(input []int) int {
-	isStraight := true
-	cardType := 10
-	for i := 0; i < len(input)/2-1; i++ {
-		if input[i]+input[len(input)-1-i] != input[len(input)/2]*2 {
-			isStraight = false
-			break
+func removeDuplicates(slice []int) []int {
+	if len(slice) == 0 {
+		return slice
+	}
+
+	result := slice[:1]
+	for _, v := range slice {
+		if v != result[len(result)-1] {
+			result = append(result, v)
 		}
 	}
 
-	isFlush := flush(input)
-
-	if isStraight && isFlush {
-		if input[len(input)/2] == 0x10c {
-			return 1
-		} else {
-			return 2
-		}
-	} else if isStraight {
-		return 6
-	} else if isFlush {
-		return 5
-	} else {
-		return cardType
-	}
-
-}
-
-func straight(input []int) int {
-	isStraight := true
-	cardType := 10
-
-	// [0x10e,0x102,0x103,0x104,0x105]例外排除
-	// 包含 0x10e,0x102
-	for i := 0; i < len(input)/2-1; i++ {
-		if getHighestDigit(input[i])+getHighestDigit(input[len(input)-1-i]) != getHighestDigit(input[len(input)/2])*2 {
-			isStraight = false
-			break
-		}
-	}
-
-	isFlush := flush(input)
-
-	if isStraight && isFlush {
-		if input[len(input)/2] == 0x10c {
-			return 1
-		} else {
-			return 2
-		}
-	} else if isStraight {
-		return 6
-	} else if isFlush {
-		return 5
-	} else {
-		return cardType
-	}
-
-}
-
-func flush(input []int) bool {
-	isFlush := true
-	for i := 1; i < len(input); i++ {
-		if getHighestDigit(input[i]) != getHighestDigit(input[i-1]) {
-			isFlush = false
-			return isFlush
-		}
-	}
-	return isFlush
+	return result
 }
 
 func getLowestDigit(hexNumber int) int {

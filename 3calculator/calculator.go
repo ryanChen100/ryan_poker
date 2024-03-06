@@ -1,8 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"poker/create_file"
 	"sort"
+	"strconv"
 )
 
 // 1、皇家同花顺：如果花色一样，数字分别是10,J,Q,K,A
@@ -16,20 +17,75 @@ import (
 // 9、ok一对：其中2张牌数字一样，另外数字不一样
 // 10、高牌：什么都不是
 
-var test1 = []int{0x102, 0x103, 0x104, 0x105, 0x106, 0x107, 0x108, 0x109, 0x10a, 0x10b, 0x10c, 0x10d, 0x10e}
-var test2 = []int{0x202, 0x203, 0x204, 0x205, 0x206, 0x207, 0x208, 0x209, 0x20a, 0x20b, 0x20c, 0x20d, 0x20e}
-var test3 = []int{0x302, 0x303, 0x304, 0x305, 0x306, 0x307, 0x308, 0x309, 0x30a, 0x30b, 0x30c, 0x30d, 0x30e}
-var test4 = []int{0x402, 0x403, 0x404, 0x405, 0x406, 0x407, 0x408, 0x409, 0x40a, 0x40b, 0x40c, 0x40d, 0x40e}
+type cardType int
+
+// String
+func (state cardType) String() string {
+	return [...]string{
+		"",
+		"皇家同花顺", //1
+		"同花顺",   //2
+		"金刚",    //3
+		"葫芦",    //4
+		"同花",    //5
+		"顺子",    //6
+		"三条",    //7
+		"两对",    //8
+		"一对",    //9
+		"高牌",    //10
+
+		"END",
+	}[state]
+}
+
+var allCard = []int{0x102, 0x103, 0x104, 0x105, 0x106, 0x107, 0x108, 0x109, 0x10a, 0x10b, 0x10c, 0x10d, 0x10e,
+	0x202, 0x203, 0x204, 0x205, 0x206, 0x207, 0x208, 0x209, 0x20a, 0x20b, 0x20c, 0x20d, 0x20e,
+	0x302, 0x303, 0x304, 0x305, 0x306, 0x307, 0x308, 0x309, 0x30a, 0x30b, 0x30c, 0x30d, 0x30e,
+	0x402, 0x403, 0x404, 0x405, 0x406, 0x407, 0x408, 0x409, 0x40a, 0x40b, 0x40c, 0x40d, 0x40e}
+
+// combinations 取所有組合
+func combinations(arr []int, n int) [][]int {
+	var helper func([]int, int, int)
+	res := [][]int{}
+	data := make([]int, n)
+
+	helper = func(arr []int, n int, idx int) {
+		if idx == n {
+			temp := make([]int, n)
+			copy(temp, data)
+			res = append(res, temp)
+			return
+		}
+		for i := 0; i < len(arr); i++ {
+			data[idx] = arr[i]
+			helper(arr[i+1:], n, idx+1)
+		}
+	}
+	helper(arr, n, 0)
+	return res
+}
 
 func main() {
+	data := [][]string{
+		{"花色", "點數", "牌型"},
+	}
+	for _, combination := range combinations(allCard, 5) {
+		flush := ""
+		point := ""
+		for _, handCard := range combination {
+			flush += strconv.Itoa(getHighestDigit(handCard)) + " "
+			point += strconv.Itoa(getLowestDigit(handCard)) + " "
+		}
 
-	fmt.Println(f([]int{0x10e, 0x502d, 0x402, 0x303, 0x204}))
+		data = append(data, []string{flush, point, cardType(f(combination)).String()})
 
+	}
+	create_file.CreateCsv(data)
 }
 
 func f(input []int) int {
 	if len(input) != 5 {
-		input = input[:5]
+		return 0
 	}
 
 	cardType := 10
@@ -53,7 +109,6 @@ func repeat(input []int) int {
 	}
 
 	appearAgain := ""
-	// appearValue := 0
 	for _, count := range statistics {
 		if count > 0 {
 			if count == 4 {
@@ -86,42 +141,43 @@ func straight(input []int) int {
 	isStraight := true
 	cardType := 10
 	sortInput := []int{}
+
 	for _, v := range input {
 		sortInput = append(sortInput, getLowestDigit(v))
 	}
-	
-	sort.Ints(sortInput)
-	fmt.Println(sortInput)
-	// [0x10e,0x102,0x103,0x104,0x105]例外排除
-	// 包含 0x10e,0x102
 
-	for i := 1; i < len(input); i++ {
-		if input[i] != input[i-1]+1 {
-			// fmt.Printf("%X,   %X\n", getLowestDigit(input[i]), getLowestDigit(input[i-1]))
-			// fmt.Println(getLowestDigit(input[i]), getLowestDigit(input[i-1]))
-			// fmt.Println(0x002, 0x00e)
-			if input[i] == 14 && input[i-1] == 2 {
-				continue
-			} else {
+	sort.Ints(sortInput)
+	checkDuplicates := removeDuplicates(sortInput)
+
+	if len(checkDuplicates) == 5 {
+
+		for i := 1; i < len(sortInput); i++ {
+			if sortInput[i] != sortInput[i-1]+1 {
+				if i == len(sortInput)-1 && sortInput[i] == 14 && sortInput[i-1] == 5 {
+					sortInput[len(sortInput)-1] = 1
+					continue
+				}
 				isStraight = false
 				break
 			}
 		}
+	} else {
+		isStraight = false
 	}
 
 	isFlush := flush(input)
 
 	if isStraight && isFlush {
-		if input[len(input)/2] == 0x10c {
+		if sortInput[len(sortInput)-1] == 14 {
 			return 1
 		} else {
 			return 2
 		}
-	} else if isStraight {
-		return 6
 	} else if isFlush {
 		return 5
-	} else {
+	}else if isStraight {
+		return 6
+	}  else {
 		return cardType
 	}
 
@@ -136,6 +192,21 @@ func flush(input []int) bool {
 		}
 	}
 	return isFlush
+}
+
+func removeDuplicates(slice []int) []int {
+	if len(slice) == 0 {
+		return slice
+	}
+
+	result := slice[:1]
+	for _, v := range slice {
+		if v != result[len(result)-1] {
+			result = append(result, v)
+		}
+	}
+
+	return result
 }
 
 func getLowestDigit(hexNumber int) int {
