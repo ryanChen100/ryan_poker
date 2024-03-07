@@ -1,7 +1,6 @@
 package main
 
 import (
-	"poker/create_file"
 	"sort"
 	"strconv"
 )
@@ -80,7 +79,6 @@ func main() {
 		data = append(data, []string{flush, point, cardType(f(combination)).String()})
 
 	}
-	create_file.CreateCsv(data)
 }
 
 func f(input []int) int {

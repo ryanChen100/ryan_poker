@@ -73,27 +73,6 @@ var allCard = []int{0x102, 0x103, 0x104, 0x105, 0x106, 0x107, 0x108, 0x109, 0x10
 // 只有1个对手，算出自己的胜率百分比，只保留整数部分
 // 请提供较高性能的方案
 
-type cardType int
-
-// String
-func (state cardType) String() string {
-	return [...]string{
-		"",
-		"皇家同花顺", //1
-		"同花顺",   //2
-		"金刚",    //3
-		"葫芦",    //4
-		"同花",    //5
-		"顺子",    //6
-		"三条",    //7
-		"两对",    //8
-		"一对",    //9
-		"高牌",    //10
-
-		"END",
-	}[state]
-}
-
 func main() {
 	fmt.Println(f([]int{0x10e, 0x10a}, []int{0x105, 0x104, 0x10c, 0x10d, 0x10b}))
 }
@@ -106,8 +85,6 @@ type card struct {
 
 	cardPoint    int
 	cardSecPoint int
-
-	isFlush int
 }
 
 var (
@@ -160,10 +137,6 @@ func getLog(userCard card, saveLog chan card) {
 				count++
 			} else if userCard.cardPoint == log.cardPoint && userCard.cardSecPoint > log.cardSecPoint {
 				count++
-				// } else if userCard.cardPoint == log.cardPoint && userCard.cardSecPoint == log.cardSecPoint {
-				// 	if finalCalculate(userCard, log) {
-				// 		count++
-				// 	}
 			}
 		}
 
@@ -174,220 +147,6 @@ func getLog(userCard card, saveLog chan card) {
 	}
 	winPro <- (count * 100) / totalRound
 }
-
-// func finalCalculate(userCard, logCard card) bool {
-// 	switch userCard.cardType {
-// 	case 1, 2:
-// 		return false
-// 	case 3:
-// 		return getSelfAndPublicMax(userCard.self, logCard.self, userCard.board, userCard.cardPoint)
-// 	case 5:
-// 		user := getSelfPointByFlush(userCard.self, userCard.isFlush)
-// 		if len(user) == 0 {
-// 			return false
-// 		}
-
-// 		log := getSelfPointByFlush(logCard.self, logCard.isFlush)
-// 		public := getSelfPointByFlush(userCard.board, userCard.isFlush)
-// 		if len(log) == 0 && public[len(public)-1] < user[0] {
-// 			return true
-// 		}
-
-// 		return combineAndSort(user, log, public)
-
-// 	case 6:
-// 		return combineAndSort(userCard.self, logCard.self, userCard.board)
-
-// 	case 7:
-// 		return combineRemoveAndSort(userCard.self, logCard.self, userCard.board, userCard.cardPoint)
-
-// 	case 8:
-// 		return twoCombineRemoveAndSort(userCard.self, logCard.self, userCard.board, userCard.cardPoint, userCard.cardSecPoint)
-
-// 	case 9:
-// 		return combineRemoveAndSort(userCard.self, logCard.self, userCard.board, userCard.cardPoint)
-// 	case 10:
-// 		return combineAndSort(userCard.self, logCard.self, userCard.board)
-// 	}
-
-// 	return false
-// }
-
-// func getSelfPointByFlush(self []int, flush int) []int {
-// 	flushArr := []int{}
-// 	for _, v := range self {
-// 		if getHighestDigit(v) == flush {
-// 			flushArr = append(flushArr, v)
-// 		}
-// 	}
-
-// 	return sortSliceDescending(flushArr)
-// }
-
-// func sortSliceDescending(slice []int) []int {
-// 	sort.Slice(slice, func(i, j int) bool {
-// 		return slice[i] > slice[j]
-// 	})
-// 	return slice
-// }
-
-// func combineAndSort(slice1, slice2, slice3 []int) bool {
-// 	u := map[int]int{}
-// 	l := map[int]int{}
-// 	p := map[int]int{}
-// 	total := sortAndRemoveDuplicates(append(append(slice1, slice2...), slice3...), 0)
-
-// 	for _, v := range slice1 {
-// 		pointInt := getLowestDigit(v)
-// 		u[pointInt]++
-// 	}
-// 	for _, v := range slice2 {
-// 		pointInt := getLowestDigit(v)
-// 		l[pointInt]++
-// 	}
-// 	for _, v := range slice3 {
-// 		pointInt := getLowestDigit(v)
-// 		p[pointInt]++
-// 	}
-
-// 	for index, v := range total {
-// 		if _, ok := p[v]; ok {
-// 			if index == 4 {
-// 				return false
-// 			}
-// 			continue
-// 		}
-
-// 		if _, ok := u[v]; !ok {
-// 			return false
-// 		}
-
-// 		if _, ok := l[v]; !ok {
-// 			return true
-// 		}
-// 	}
-
-// 	return false
-// }
-
-// func combineRemoveAndSort(slice1, slice2, slice3 []int, point int) bool {
-// 	u := map[int]int{}
-// 	l := map[int]int{}
-// 	p := map[int]int{}
-// 	total := sortAndRemoveDuplicates(append(append(slice1, slice2...), slice3...), point)
-
-// 	for _, v := range slice1 {
-// 		pointInt := getLowestDigit(v)
-// 		u[pointInt]++
-// 	}
-// 	for _, v := range slice2 {
-// 		pointInt := getLowestDigit(v)
-// 		l[pointInt]++
-// 	}
-// 	for _, v := range slice3 {
-// 		pointInt := getLowestDigit(v)
-// 		p[pointInt]++
-// 	}
-
-// 	for index, v := range total {
-// 		if _, ok := p[v]; ok {
-// 			if index == 1 {
-// 				return false
-// 			}
-// 			continue
-// 		}
-
-// 		if _, ok := u[v]; !ok {
-// 			return false
-// 		}
-
-// 		if _, ok := l[v]; !ok {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
-
-// func twoCombineRemoveAndSort(slice1, slice2, slice3 []int, point, pointSec int) bool {
-// 	u := map[int]int{}
-// 	l := map[int]int{}
-// 	p := map[int]int{}
-// 	total := sortAndRemoveDuplicates(sortAndRemoveDuplicates(append(append(slice1, slice2...), slice3...), point), pointSec)
-
-// 	for _, v := range slice1 {
-// 		pointInt := getLowestDigit(v)
-// 		u[pointInt]++
-// 	}
-// 	for _, v := range slice2 {
-// 		pointInt := getLowestDigit(v)
-// 		l[pointInt]++
-// 	}
-// 	for _, v := range slice3 {
-// 		pointInt := getLowestDigit(v)
-// 		p[pointInt]++
-// 	}
-
-// 	for index, v := range total {
-// 		if _, ok := p[v]; ok {
-// 			if index == 1 {
-// 				return false
-// 			}
-// 			continue
-// 		}
-
-// 		if _, ok := u[v]; !ok {
-// 			return false
-// 		}
-
-// 		if _, ok := l[v]; !ok {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
-
-// func sortAndRemoveDuplicates(slice []int, point int) []int {
-// 	uniqueMap := make(map[int]bool)
-// 	for _, v := range slice {
-// 		pointInt := getLowestDigit(v)
-// 		if pointInt == point {
-// 			continue
-// 		}
-// 		uniqueMap[pointInt] = true
-// 	}
-
-// 	uniqueSlice := make([]int, 0, len(uniqueMap))
-// 	for k := range uniqueMap {
-// 		uniqueSlice = append(uniqueSlice, k)
-// 	}
-
-// 	sort.Slice(uniqueSlice, func(i, j int) bool {
-// 		return uniqueSlice[i] > uniqueSlice[j]
-// 	})
-
-// 	return uniqueSlice
-// }
-
-// func getSelfAndPublicMax(user, log, public []int, point int) bool {
-// 	sort.Ints(user)
-// 	sort.Ints(log)
-// 	p := removeElement(public, point)
-// 	if user[len(user)-1] > log[len(log)-1] && user[len(user)-1] > p[len(p)-1] {
-// 		return true
-// 	} else {
-// 		return false
-// 	}
-// }
-
-// func removeElement(slice []int, element int) []int {
-// 	result := []int{}
-// 	for _, v := range slice {
-// 		if v != element {
-// 			result = append(result, v)
-// 		}
-// 	}
-// 	return result
-// }
 
 func setLog(proCard card, saveLog chan card) {
 	proCard.getUserType()

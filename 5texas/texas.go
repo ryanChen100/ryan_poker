@@ -1,9 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"sort"
-	"time"
+	"strconv"
 )
 
 // 1、皇家同花顺：如果花色一样，数字分别是10,J,Q,K,A
@@ -16,8 +15,6 @@ import (
 // 8、两对：其中2张牌数字一样，另外其中2张牌数字一样，最后一张数字不一样
 // 9、一对：其中2张牌数字一样，另外数字不一样
 // 10、高牌：什么都不是
-// 0x50f代表小王
-// 0x610代表大王
 
 type cardType int
 
@@ -68,25 +65,20 @@ func combinations(arr []int, n int) [][]int {
 }
 
 func main() {
-	// data := [][]string{
-	// 	{"花色", "點數", "牌型"},
-	// }
-	// for _, combination := range combinations(allCard, 7) {
-	// 	flush := ""
-	// 	point := ""
-	// 	for _, handCard := range combination {
-	// 		flush += strconv.Itoa(getHighestDigit(handCard)) + " "
-	// 		point += strconv.Itoa(getLowestDigit(handCard)) + " "
-	// 	}
+	data := [][]string{
+		{"花色", "點數", "牌型"},
+	}
+	for _, combination := range combinations(allCard, 7) {
+		flush := ""
+		point := ""
+		for _, handCard := range combination {
+			flush += strconv.Itoa(getHighestDigit(handCard)) + " "
+			point += strconv.Itoa(getLowestDigit(handCard)) + " "
+		}
 
-	// 	data = append(data, []string{flush, point, cardType(f(combination[:2], combination[2:])).String()})
+		data = append(data, []string{flush, point, cardType(f(combination[:2], combination[2:])).String()})
 
-	// }
-	// fmt.Println("=================")
-	// create_file.CreateCsv(data)
-	start := time.Now()
-	fmt.Println(f([]int{0x10b, 0x10a}, []int{0x105, 0x104, 0x10c, 0x10d, 0x10e}))
-	fmt.Println(time.Since(start))
+	}
 }
 
 func f(self, board []int) int {

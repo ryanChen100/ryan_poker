@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"sort"
+	"strconv"
 )
 
 // 请完成函数f，输入的5个数字代表5张牌，含义如下：
@@ -74,24 +74,20 @@ func combinations(arr []int, n int) [][]int {
 }
 
 func main() {
-	// data := [][]string{
-	// 	{"花色", "點數", "牌型"},
-	// }
-	// for _, combination := range combinations(allCard, 5) {
-	// 	flush := ""
-	// 	point := ""
-	// 	for _, handCard := range combination {
-	// 		flush += strconv.Itoa(getHighestDigit(handCard)) + " "
-	// 		point += strconv.Itoa(getLowestDigit(handCard)) + " "
-	// 	}
-	// 	tmp := f(combination)
-	// 	data = append(data, []string{flush, point, cardType(tmp).String(), strconv.Itoa(tmp)})
+	data := [][]string{
+		{"花色", "點數", "牌型"},
+	}
+	for _, combination := range combinations(allCard, 5) {
+		flush := ""
+		point := ""
+		for _, handCard := range combination {
+			flush += strconv.Itoa(getHighestDigit(handCard)) + " "
+			point += strconv.Itoa(getLowestDigit(handCard)) + " "
+		}
+		tmp := f(combination)
+		data = append(data, []string{flush, point, cardType(tmp).String(), strconv.Itoa(tmp)})
 
-	// }
-	// create_file.CreateCsv(data)
-	// fmt.Println(f([]int{0x102, 0x103, 0x10e, 0x50f, 0x610}))
-	fmt.Println(f([]int{0x102, 0x103, 0x104, 0x10e, 0x610}))
-
+	}
 }
 
 func f(input []int) int {
