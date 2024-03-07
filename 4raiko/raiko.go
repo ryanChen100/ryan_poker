@@ -89,7 +89,8 @@ func main() {
 
 	// }
 	// create_file.CreateCsv(data)
-	fmt.Println(f([]int{0x102, 0x103, 0x104, 0x105, 0x10e}))
+	// fmt.Println(f([]int{0x102, 0x103, 0x10e, 0x50f, 0x610}))
+	fmt.Println(f([]int{0x102, 0x103, 0x104, 0x10e, 0x610}))
 
 }
 
@@ -106,12 +107,14 @@ func f(input []int) int {
 		if v == 0x50f || v == 0x610 {
 			raikoCount++
 		} else {
-			statistics[getLowestDigit(v)]++
+			tmp := getLowestDigit(v)
+			statistics[tmp]++
 		}
 	}
-
 	for _, v := range statistics {
-		samePoint = append(samePoint, v)
+		if v > 1 {
+			samePoint = append(samePoint, v)
+		}
 	}
 
 	cardType := raikoRepeat(raikoCount, samePoint)
@@ -127,69 +130,66 @@ func raikoRepeat(raiko int, same []int) int {
 	if len(same) == 0 && raiko == 0 {
 		return 10
 	}
-
-	max := []int{}
-	for _, v := range same {
-		max = append(max, v)
+	if len(same) == 0 {
+		if raiko == 1 {
+			return 9
+		} else if raiko == 2 {
+			return 7
+		}
+		return 10
 	}
 
-	sort.Ints(max)
+	sort.Ints(same)
 
-	max[len(max)-1] += raiko
+	same[len(same)-1] += raiko
 
-	if max[len(max)-1] > 3 {
+	if same[len(same)-1] > 3 {
 		return 3
-	} else if max[len(max)-1] == 3 && max[len(max)-2] == 2 {
+	} else if same[len(same)-1] == 3 && len(same) > 1 && (same[len(same)-2]) == 2 {
 		return 4
-	} else if max[len(max)-1] == 3 {
+	} else if same[len(same)-1] == 3 {
 		return 7
-	} else if max[len(max)-1] == 2 {
+	} else if same[len(same)-1] == 2 {
 		return 9
 	}
 	return 10
 }
 
-// "金刚",      //3
-// "葫芦",      //4
-// "同花",      //5
-// "顺子",      //6
-// "三条",      //7
-// "两对",      //8
-// "一对",      //9
-// "高牌",      //10
-
 func raikoStraight(raikoCount int, input []int) int {
 	isStraight := true
 	cardType := 10
-	sortInput := []int{}
-
+	var straightArr []int
 	for _, v := range input {
-		sortInput = append(sortInput, getLowestDigit(v))
+		if v == 0x50f || v == 0x610 {
+			continue
+		}
+		straightArr = append(straightArr, getLowestDigit(v))
 	}
 
-	sort.Ints(sortInput)
-	checkDuplicates := removeDuplicates(sortInput)
+	sort.Ints(straightArr)
 
-	if len(checkDuplicates)+raikoCount == 5 {
+	checkDuplicates := removeDuplicates(straightArr)
+
+	if len(checkDuplicates)+raikoCount >= 5 {
 
 		passCount := raikoCount
-		for i := 1; i < len(sortInput); i++ {
-			fmt.Println(sortInput[i], sortInput[i-1])
-			if sortInput[i] != sortInput[i-1]+1 {
-				if i == len(sortInput)-1 && sortInput[i] == 14 && sortInput[i-1] == 5 {
-					sortInput[len(sortInput)-1] = 1
+
+		for i := 1; i < len(straightArr); i++ {
+			if straightArr[i] != straightArr[i-1]+1 {
+				if i == len(straightArr)-1 && straightArr[i] == 14 && straightArr[i-1] == 5 {
+					straightArr[len(straightArr)-1] = 1
 					continue
 				}
 
 				if passCount > 0 {
-					if sortInput[i] == sortInput[i-1]+2 || i == len(sortInput)-1 && sortInput[i] == 14 && sortInput[i-1] == 4 {
+					if i == 4 || straightArr[i] == straightArr[i-1]+2 || i == len(straightArr)-1 && straightArr[i] == 14 && straightArr[i-1] == 4 {
 						passCount--
 						continue
 					}
 				}
 
 				if passCount > 1 {
-					if sortInput[i] == sortInput[i-1]+3 || i == len(sortInput)-1 && sortInput[i] == 14 && sortInput[i-1] == 3 {
+					if i == 3 || straightArr[i] == straightArr[i-1]+3 || i == len(straightArr)-1 && straightArr[i] == 14 && straightArr[i-1] == 3 {
 						passCount -= 2
 						continue
 					}
@@ -205,11 +205,12 @@ func raikoStraight(raikoCount int, input []int) int {
 	isFlush := flush(raikoCount, input)
 
 	if isStraight && isFlush {
-		if sortInput[len(sortInput)-1] == 14 {
-			return 1
-		} else {
-			return 2
+		for _, v := range straightArr {
+			if v < 10 {
+				return 2
+			}
 		}
+		return 1
 	} else if isFlush {
 		return 5
 	} else if isStraight {
@@ -231,7 +232,6 @@ func flush(raiko int, input []int) bool {
 			max = v
 		}
 	}
-
 	if max+raiko >= 5 {
 		return true
 	} else {
@@ -256,18 +256,11 @@ func removeDuplicates(slice []int) []int {
 }
 
 func getLowestDigit(hexNumber int) int {
-	// 使用按位与操作获取最低位的值
-	// lowestDigit := hexNumber & 0xF
-
 	return hexNumber & 0xF
 }
 
 func getHighestDigit(hexNumber int) int {
-	// 右移 12 位，将最高位移到最右边
 	firstDigit := hexNumber >> 8
-
-	// 使用按位与操作获取最高位的值
 	firstDigit = firstDigit & 0xF
-
 	return firstDigit
 }

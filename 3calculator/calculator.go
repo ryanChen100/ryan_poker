@@ -175,9 +175,9 @@ func straight(input []int) int {
 		}
 	} else if isFlush {
 		return 5
-	}else if isStraight {
+	} else if isStraight {
 		return 6
-	}  else {
+	} else {
 		return cardType
 	}
 
@@ -210,17 +210,11 @@ func removeDuplicates(slice []int) []int {
 }
 
 func getLowestDigit(hexNumber int) int {
-	// 使用按位与操作获取最低位的值
-	// lowestDigit := hexNumber & 0xF
-
 	return hexNumber & 0xF
 }
 
 func getHighestDigit(hexNumber int) int {
-	// 右移 12 位，将最高位移到最右边
 	firstDigit := hexNumber >> 8
-
-	// 使用按位与操作获取最高位的值
 	firstDigit = firstDigit & 0xF
 
 	return firstDigit

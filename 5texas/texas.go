@@ -205,10 +205,8 @@ func flush(input []int) bool {
 func calculatorStraight(input []int) int {
 	sort.Ints(input)
 	recodeStraight := []int{input[0]}
-	fmt.Println(input)
 	for i := 1; i < len(input); i++ {
 		if input[i] != input[i-1]+1 {
-			fmt.Println(getLowestDigit(input[i]), getLowestDigit(input[i-1]))
 			if getLowestDigit(input[i]) == 14 && getLowestDigit(input[i-1]) == 5 {
 				input[i] = 1
 				recodeStraight = append(recodeStraight, input[i])
@@ -227,7 +225,6 @@ func calculatorStraight(input []int) int {
 			return 5
 		}
 		recodeStraight = append(recodeStraight, input[i])
-		fmt.Println(recodeStraight)
 	}
 
 	sort.Ints(recodeStraight)
@@ -254,17 +251,11 @@ func removeDuplicates(slice []int) []int {
 }
 
 func getLowestDigit(hexNumber int) int {
-	// 使用按位与操作获取最低位的值
-	// lowestDigit := hexNumber & 0xF
-
 	return hexNumber & 0xF
 }
 
 func getHighestDigit(hexNumber int) int {
-	// 右移 12 位，将最高位移到最右边
 	firstDigit := hexNumber >> 8
-
-	// 使用按位与操作获取最高位的值
 	firstDigit = firstDigit & 0xF
 
 	return firstDigit

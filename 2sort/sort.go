@@ -16,7 +16,6 @@ func f(input []int) string {
 
 	inputStr := ""
 	for index, v := range input {
-		fmt.Println(index, v, len(input))
 		if index != len(input)-1 {
 			inputStr += strconv.Itoa(v) + " "
 		} else {
