@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"sort"
-	"time"
 )
 
 // 1、皇家同花顺：如果花色一样，数字分别是10,J,Q,K,A
@@ -19,74 +18,8 @@ import (
 // 0x50f代表小王
 // 0x610代表大王
 
-type cardType int
-
-// String
-func (state cardType) String() string {
-	return [...]string{
-		"",
-		"皇家同花顺", //1
-		"同花顺",   //2
-		"金刚",    //3
-		"葫芦",    //4
-		"同花",    //5
-		"顺子",    //6
-		"三条",    //7
-		"两对",    //8
-		"一对",    //9
-		"高牌",    //10
-
-		"END",
-	}[state]
-}
-
-var allCard = []int{0x102, 0x103, 0x104, 0x105, 0x106, 0x107, 0x108, 0x109, 0x10a, 0x10b, 0x10c, 0x10d, 0x10e,
-	0x202, 0x203, 0x204, 0x205, 0x206, 0x207, 0x208, 0x209, 0x20a, 0x20b, 0x20c, 0x20d, 0x20e,
-	0x302, 0x303, 0x304, 0x305, 0x306, 0x307, 0x308, 0x309, 0x30a, 0x30b, 0x30c, 0x30d, 0x30e,
-	0x402, 0x403, 0x404, 0x405, 0x406, 0x407, 0x408, 0x409, 0x40a, 0x40b, 0x40c, 0x40d, 0x40e}
-
-// combinations 取所有組合
-func combinations(arr []int, n int) [][]int {
-	var helper func([]int, int, int)
-	res := [][]int{}
-	data := make([]int, n)
-
-	helper = func(arr []int, n int, idx int) {
-		if idx == n {
-			temp := make([]int, n)
-			copy(temp, data)
-			res = append(res, temp)
-			return
-		}
-		for i := 0; i < len(arr); i++ {
-			data[idx] = arr[i]
-			helper(arr[i+1:], n, idx+1)
-		}
-	}
-	helper(arr, n, 0)
-	return res
-}
-
 func main() {
-	// data := [][]string{
-	// 	{"花色", "點數", "牌型"},
-	// }
-	// for _, combination := range combinations(allCard, 7) {
-	// 	flush := ""
-	// 	point := ""
-	// 	for _, handCard := range combination {
-	// 		flush += strconv.Itoa(getHighestDigit(handCard)) + " "
-	// 		point += strconv.Itoa(getLowestDigit(handCard)) + " "
-	// 	}
-
-	// 	data = append(data, []string{flush, point, cardType(f(combination[:2], combination[2:])).String()})
-
-	// }
-	// fmt.Println("=================")
-	// create_file.CreateCsv(data)
-	start := time.Now()
 	fmt.Println(f([]int{0x10b, 0x10a}, []int{0x105, 0x104, 0x10c, 0x10d, 0x10e}))
-	fmt.Println(time.Since(start))
 }
 
 func f(self, board []int) int {
@@ -114,7 +47,6 @@ type calculatorCard struct {
 	pointArr  []int
 	flushArr  []int
 	cardType  int
-	cardPoint int
 	round     int
 
 	isflush    map[int]int

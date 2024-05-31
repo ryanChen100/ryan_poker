@@ -59,11 +59,6 @@ import (
 // 0x302,0x303,0x304,0x305,0x306,0x307,0x308,0x309,0x30a,0x30b,0x30c,0x30d,0x30e分别代表红桃2,3,4,5,6,7,8,9,10,J,Q,K,A
 // 0x402,0x403,0x404,0x405,0x406,0x407,0x408,0x409,0x40a,0x40b,0x40c,0x40d,0x40e分别代表黑桃2,3,4,5,6,7,8,9,10,J,Q,K,A
 
-// var allCard = []int{0x102, 0x103, 0x104, 0x105, 0x106, 0x107, 0x108, 0x109, 0x10a, 0x10b, 0x10c, 0x10d, 0x10e,
-//
-//	0x202, 0x203, 0x204, 0x205, 0x206, 0x207, 0x208, 0x209, 0x20a, 0x20b, 0x20c, 0x20d, 0x20e,
-//	0x302, 0x303, 0x304, 0x305, 0x306, 0x307, 0x308, 0x309, 0x30a, 0x30b, 0x30c, 0x30d, 0x30e,
-//	0x402, 0x403, 0x404, 0x405, 0x406, 0x407, 0x408, 0x409, 0x40a, 0x40b, 0x40c, 0x40d, 0x40e}
 var allCard = []int{0x102, 0x103, 0x104, 0x105, 0x106, 0x107, 0x108, 0x109, 0x10a, 0x10b, 0x10c, 0x10d, 0x10e,
 	0x202, 0x203, 0x204, 0x205, 0x206, 0x207, 0x208, 0x209, 0x20a, 0x20b, 0x20c, 0x20d, 0x20e,
 	0x302, 0x303, 0x304, 0x305, 0x306, 0x307, 0x308, 0x309, 0x30a, 0x30b, 0x30c, 0x30d, 0x30e,
@@ -100,13 +95,13 @@ func f(self, board []int) int {
 		board: board,
 		input: newCard,
 	}
-	userCard.getUserType()
+	userCard.getCardType()
 	allCard = remove(allCard, newCard)
 	allPro := combinations(allCard, 2)
 	totalRound = len(allPro)
-	saveLog := make(chan card, totalRound)
+	allCardResult := make(chan card, totalRound)
 	winPro = make(chan int)
-	go getLog(userCard, saveLog)
+	go getWinPro(userCard, allCardResult)
 
 	for _, v := range allPro {
 		newPro := append(v, board...)
@@ -118,42 +113,40 @@ func f(self, board []int) int {
 		}
 
 		go func(pro card, saveLog chan card) {
-			setLog(pro, saveLog)
-		}(pro, saveLog)
+			pro.getCardType()
+			saveLog <- pro
+		}(pro, allCardResult)
 
 	}
 	return <-winPro
 }
 
-func getLog(userCard card, saveLog chan card) {
-	count := 0
-	tmp := 0
+func getWinPro(userCard card, saveLog chan card) {
+	var (
+		Wincount = 0
+		runCount = 0
+	)
 
 	for log := range saveLog {
 		if userCard.cardType < log.cardType {
-			count++
+			Wincount++
 		} else if userCard.cardType == log.cardType {
 			if userCard.cardPoint > log.cardPoint {
-				count++
+				Wincount++
 			} else if userCard.cardPoint == log.cardPoint && userCard.cardSecPoint > log.cardSecPoint {
-				count++
+				Wincount++
 			}
 		}
 
-		tmp++
-		if tmp == totalRound {
+		runCount++
+		if runCount == totalRound {
 			break
 		}
 	}
-	winPro <- (count * 100) / totalRound
+	winPro <- (Wincount * 100) / totalRound
 }
 
-func setLog(proCard card, saveLog chan card) {
-	proCard.getUserType()
-	saveLog <- proCard
-}
-
-func (c *card) getUserType() {
+func (c *card) getCardType() {
 	c.repeat()
 	c.straight()
 }
